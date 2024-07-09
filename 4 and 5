@@ -1,0 +1,77 @@
+from typing import List, Tuple
+import turtle
+
+class Ponto2D:
+    def __init__(self, x: float, y: float):
+        self.coord = (x, y)
+
+class Poligono:
+    def __init__(self, pontos: List[Ponto2D], cor: str):
+        self.pontos = pontos
+        self.cor = cor
+
+class Poligonos:
+    def __init__(self):
+        self.poligonos = {}
+
+    def adicionar_poligono(self, poligono: Poligono, nome: str):
+        self.poligonos[nome] = poligono
+
+    def remover_poligono(self, nome: str):
+        if nome in self.poligonos:
+            del self.poligonos[nome]
+
+    def salvar_em_arquivo(self, nome_arquivo: str):
+        with open(nome_arquivo, 'w') as arquivo:
+            for nome, poligono in self.poligonos.items():
+                pontos_str = ' '.join(f"{ponto.coord[0]},{ponto.coord[1]}" for ponto in poligono.pontos)
+                arquivo.write(f"{nome} {poligono.cor} {pontos_str}\n")
+
+    def carregar_de_arquivo(self, nome_arquivo: str):
+        with open(nome_arquivo, 'r') as arquivo:
+            for linha in arquivo:
+                partes = linha.strip().split()
+                nome = partes[0]
+                cor = partes[1]
+                pontos = [Ponto2D(float(x), float(y)) for x, y in (ponto.split(',') for ponto in partes[2:])]
+                self.poligonos[nome] = Poligono(pontos, cor)
+
+def plotar_poligonos(poligonos: Poligonos):
+    for poligono in poligonos.poligonos.values():
+        turtle.color(poligono.cor)
+        turtle.penup()
+        pontos = poligono.pontos
+        turtle.goto(pontos[0].coord)
+        turtle.pendown()
+        for ponto in pontos[1:]:
+            turtle.goto(ponto.coord)
+        turtle.goto(pontos[0].coord)
+        turtle.penup()
+    
+    turtle.done()
+
+# Exemplo de uso
+if __name__ == "__main__":
+    # Criar alguns pontos
+    p1 = Ponto2D(0, 0)
+    p2 = Ponto2D(100, 0)
+    p3 = Ponto2D(100, 100)
+    p4 = Ponto2D(0, 100)
+    
+    # Criar um polígono
+    poligono1 = Poligono([p1, p2, p3, p4], "red")
+    
+    # Criar a coleção de polígonos
+    poligonos = Poligonos()
+    poligonos.adicionar_poligono(poligono1, "quadrado")
+    
+    # Salvar para um arquivo
+    poligonos.salvar_em_arquivo("poligonos.txt")
+    
+    # Carregar do arquivo
+    poligonos.carregar_de_arquivo("poligonos.txt")
+    for nome, poligono in poligonos.poligonos.items():
+        print(f"Polígono {nome}: Cor {poligono.cor}, Pontos {[ponto.coord for ponto in poligono.pontos]}")
+
+    # Plotar os polígonos
+    plotar_poligonos(poligonos)
